@@ -1,5 +1,5 @@
 // src/models/User.ts
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 
 export interface IUserProfile {
   college?: string;
@@ -9,7 +9,8 @@ export interface IUserProfile {
   experience?: string;
 }
 
-export interface IUser extends Document {
+
+export interface IUser {
   _id: string;
   name: string;
   email: string;

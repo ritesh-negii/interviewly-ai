@@ -12,7 +12,6 @@ interface MongooseCache {
   promise: Promise<typeof mongoose> | null;
 }
 
-// Use global cache to prevent multiple connections in development
 declare global {
   var mongoose: MongooseCache | undefined;
 }
