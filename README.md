@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤖 InterviewAI - AI-Powered Mock Interview Platform
 
-## Getting Started
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/Node.js-v18+-green.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 
-First, run the development server:
+**InterviewAI** is an intelligent mock interview application designed to help developers practice technical, behavioral, and role-specific questions. Powered by **Google Gemini AI**, it generates personalized questions based on your resume and provides real-time feedback with scoring.
 
+🔗 **[Live Demo](https://your-vercel-app-url.vercel.app)** 
+
+---
+
+## 🚀 Key Features
+
+- **🧠 AI-Powered Question Generation:** Uses Gemini AI (Flash Model) to create unique questions dynamically based on difficulty and topic.
+- **📄 Resume Analysis:** Upload your resume (PDF) to get tailored questions based on your actual skills and projects.
+- **🎙️ Realistic Simulation:**
+  - **Technical:** DSA & System Design questions.
+  - **Behavioral:** HR rounds focusing on the STAR method.
+  - **AI-Powered:** Personalized deep-dives into your specific experience.
+- **📊 Detailed Feedback:** Get instant scores (0-100), strength analysis, and improvement areas after every answer.
+- **📈 Progress Tracking:** Comprehensive dashboard with charts to track interview history, average scores, and practice streaks.
+- **🔐 Secure Authentication:** Complete JWT-based auth system with profile management.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS, Lucide React
+- **Backend:** Next.js API Routes (Serverless)
+- **Database:** MongoDB Atlas (Mongoose)
+- **AI Engine:** Google Gemini API (gemini-2.5-flash-lite)
+- **Authentication:** JWT (JSON Web Tokens) & Context API
+- **Deployment:** Vercel (Frontend/API) + MongoDB Atlas (DB)
+
+---
+
+
+## 🔧 Installation & Local Setup
+
+Follow these steps to run the project locally:
+
+### 1. Clone the Repository
 ```bash
+git clone [https://github.com/ritesh-negii/interviewly-ai.git](https://github.com/ritesh-negii/interviewly-ai.git)
+cd interviewly-ai
+
+2. Install Dependencies
+Bash
+
+npm install
+3. Environment Variables
+Create a .env.local file in the root directory and add the following configuration:
+
+Code snippet
+
+# MongoDB Connection (Get this from MongoDB Atlas)
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+
+# Security (Any random string for JWT encryption)
+JWT_SECRET=your_super_secret_key_123
+
+# AI Configuration (Get keys from Google AI Studio)
+# You can add multiple keys separated by commas for automatic rotation
+GEMINI_API_KEYS=key1,key2,key3
+
+# App URL
+NEXT_PUBLIC_API_URL=http://localhost:3000
+4. Run the Development Server
+Bash
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Open http://localhost:3000 in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🌟 How It Works
+Sign Up: Create an account to save your progress and streaks.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Upload Resume: (Optional) Upload a PDF resume. The AI parses your skills and projects to ask relevant questions.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Choose Mode: Select from Technical, Behavioral, or AI-Powered interview modes.
 
-## Learn More
+Practice: Answer AI-generated questions in real-time.
 
-To learn more about Next.js, take a look at the following resources:
+Review: Receive a detailed performance report with actionable feedback and scoring.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🤝 Contributing
+Contributions are welcome!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Fork the project
 
-## Deploy on Vercel
+Create your feature branch (git checkout -b feature/AmazingFeature)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Commit your changes (git commit -m 'Add some AmazingFeature')
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Push to the branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📬 Contact
+Ritesh - GitHub
+
+Built with ❤️ and ☕.
