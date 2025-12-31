@@ -5,7 +5,8 @@ import InterviewSession from "@/models/InterviewSession";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -15,7 +16,9 @@ export async function GET(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+   
+    const { id } = await params;
+
     const session = await InterviewSession.findOne({ _id: id, userId });
 
     if (!session) {
