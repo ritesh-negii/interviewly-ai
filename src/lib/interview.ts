@@ -1,6 +1,6 @@
 // src/lib/interview.ts
 import InterviewSession from "@/models/InterviewSession";
-import User from "@/models/User";
+import User from "@/models/UserModel";
 import Resume from "@/models/Resume";
 import { generateQuestion, evaluateAnswer, generateFinalReport } from "./gemini";
 

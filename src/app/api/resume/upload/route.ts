@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getUserIdFromRequest } from "@/lib/auth";
 import Resume from "@/models/Resume";
-import User from "@/models/User";
+import User from "@/models/UserModel";
 import { analyzeResumeWithGemini } from "@/lib/gemini";
 import PDFParser from "pdf2json"; 
 

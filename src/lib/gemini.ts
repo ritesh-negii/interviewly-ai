@@ -1,7 +1,7 @@
 // src/lib/gemini.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { v4 as uuidv4 } from "uuid";
-import { IUserProfile } from "@/models/User";
+import { IUserProfile } from "@/models/UserModel";
 import { IParsedData } from "@/models/Resume";
 import { IInterviewSession } from "@/models/InterviewSession";
 
