@@ -1,7 +1,7 @@
-// src/app/api/auth/login/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import User from "@/models/user";
+import User from "@/models/User";
 import { comparePassword, generateToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = await request.json();
 
-    // Validation
+    
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: "Email and password are required" },
@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Normalize email
+   
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Find user
+    
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return NextResponse.json(
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
+  
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate token
+  
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,

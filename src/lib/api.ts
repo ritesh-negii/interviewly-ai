@@ -18,14 +18,14 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
 
-  // ✅ CRITICAL: Get token from localStorage
+ 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const config: RequestInit = {
     method,
     headers: {
       "Content-Type": "application/json",
-      // ✅ CRITICAL: Send Authorization header with Bearer token
+      
       ...(token && { Authorization: `Bearer ${token}` }),
       ...headers,
     },
@@ -53,7 +53,7 @@ export async function apiRequest<T>(
   }
 }
 
-// Convenience methods
+
 export const api = {
   get: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: "GET" }),
   

@@ -1,7 +1,7 @@
 // src/app/api/resume/my/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import User from "@/models/user";
+import User from "@/models/User";
 import Resume from "@/models/Resume";
 import { getUserIdFromRequest } from "@/lib/auth";
 
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    // Get user ID from token
+    
     const userId = getUserIdFromRequest(request);
 
     if (!userId) {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user's resume
+    
     const resume = await Resume.findOne({
       userId,
       status: { $in: ["pending", "confirmed"] },
@@ -70,7 +70,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // ✅ FIX #5: Static import instead of dynamic import
     await User.findByIdAndUpdate(userId, { resumeUploaded: false });
 
     return NextResponse.json(

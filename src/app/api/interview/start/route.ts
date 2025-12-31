@@ -1,67 +1,44 @@
-// src/app/api/interview/start/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getUserIdFromRequest } from "@/lib/auth";
-import { startInterview } from "@/lib/interview";
-import type { StartInterviewRequest } from "@/types/interview";
+import { startInterview } from "@/lib/interview"; 
 
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
-
-    // Get user ID from token
     const userId = getUserIdFromRequest(request);
 
     if (!userId) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const body: StartInterviewRequest = await request.json();
-    const { type, difficulty, duration } = body;
+    const body = await request.json();
+    
 
-    // Validation
-    if (!type || !difficulty || !duration) {
-      return NextResponse.json(
-        { success: false, message: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    const { 
+      type = "technical", 
+      difficulty = "medium", 
+      duration = "standard" 
+    } = body;
 
-    if (!["technical", "behavioral", "role-specific"].includes(type)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid interview type" },
-        { status: 400 }
-      );
-    }
-
-    if (!["easy", "medium", "hard"].includes(difficulty)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid difficulty level" },
-        { status: 400 }
-      );
-    }
-
-    if (!["quick", "standard", "full"].includes(duration)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid duration" },
-        { status: 400 }
-      );
-    }
-
-    // Start interview
-    const result = await startInterview(userId, type, difficulty, duration);
+   
+    const result = await startInterview(
+      userId,
+      type,
+      difficulty,
+      duration
+    );
 
     return NextResponse.json(
       {
         success: true,
         message: "Interview started successfully",
-        ...result,
+        sessionId: result.sessionId, 
       },
       { status: 201 }
     );
+
   } catch (error: any) {
     console.error("❌ Start interview error:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 // src/lib/constants.ts
 
-// Interview Types
+
 export const INTERVIEW_TYPES = {
   TECHNICAL: "technical",
   BEHAVIORAL: "behavioral",
@@ -9,7 +9,7 @@ export const INTERVIEW_TYPES = {
 
 export type InterviewType = (typeof INTERVIEW_TYPES)[keyof typeof INTERVIEW_TYPES];
 
-// Difficulty Levels
+
 export const DIFFICULTY_LEVELS = {
   EASY: "easy",
   MEDIUM: "medium",
@@ -18,7 +18,7 @@ export const DIFFICULTY_LEVELS = {
 
 export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[keyof typeof DIFFICULTY_LEVELS];
 
-// Interview Durations
+
 export const INTERVIEW_DURATIONS = {
   QUICK: "quick",
   STANDARD: "standard",
@@ -27,14 +27,14 @@ export const INTERVIEW_DURATIONS = {
 
 export type InterviewDuration = (typeof INTERVIEW_DURATIONS)[keyof typeof INTERVIEW_DURATIONS];
 
-// Question Counts by Duration
+
 export const QUESTION_COUNTS: Record<InterviewDuration, number> = {
   quick: 5,
   standard: 10,
   full: 15,
 };
 
-// Interview Status
+
 export const INTERVIEW_STATUS = {
   IN_PROGRESS: "in-progress",
   PAUSED: "paused",
@@ -44,7 +44,7 @@ export const INTERVIEW_STATUS = {
 
 export type InterviewStatus = (typeof INTERVIEW_STATUS)[keyof typeof INTERVIEW_STATUS];
 
-// Question Categories
+
 export const QUESTION_CATEGORIES = {
   DSA: "DSA",
   SYSTEM_DESIGN: "System Design",
@@ -55,7 +55,7 @@ export const QUESTION_CATEGORIES = {
 
 export type QuestionCategory = (typeof QUESTION_CATEGORIES)[keyof typeof QUESTION_CATEGORIES];
 
-// Resume Status
+
 export const RESUME_STATUS = {
   PENDING: "pending",
   CONFIRMED: "confirmed",
@@ -63,7 +63,7 @@ export const RESUME_STATUS = {
 
 export type ResumeStatus = (typeof RESUME_STATUS)[keyof typeof RESUME_STATUS];
 
-// Experience Levels
+
 export const EXPERIENCE_LEVELS = [
   "Fresher (0-1 years)",
   "Junior (1-3 years)",
@@ -73,7 +73,7 @@ export const EXPERIENCE_LEVELS = [
 
 export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 
-// Education Years
+
 export const EDUCATION_YEARS = [
   "1st Year",
   "2nd Year",
@@ -92,7 +92,7 @@ export const SCORE_RANGES = {
   POOR: { min: 1, max: 3, label: "Poor" },
 } as const;
 
-// API Response Messages
+
 export const API_MESSAGES = {
   SUCCESS: {
     SIGNUP: "Signup successful",

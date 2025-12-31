@@ -1,14 +1,14 @@
 // src/app/api/profile/update/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import User from "@/models/user";
+import User from "@/models/User";
 import { getUserIdFromRequest } from "@/lib/auth";
 
 export async function PUT(request: NextRequest) {
   try {
     await connectDB();
 
-    // Get user ID from token
+ 
     const userId = getUserIdFromRequest(request);
 
     if (!userId) {
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest) {
 
     const { college, degree, year, targetRole, experience } = await request.json();
 
-    // Validation
+    
     if (!college || !degree || !year || !targetRole || !experience) {
       return NextResponse.json(
         { success: false, message: "All profile fields are required" },
@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Update user profile
+  
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {

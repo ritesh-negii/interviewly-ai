@@ -61,7 +61,6 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// Prevent model recompilation in development
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 

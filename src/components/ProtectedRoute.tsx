@@ -22,19 +22,18 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading) {
-      // Not authenticated - redirect to login
+     
       if (!isAuthenticated) {
         router.push("/login");
         return;
       }
 
-      // Authenticated but profile not complete
+     
       if (requireProfile && user && !user.profileCompleted) {
         router.push("/profile");
         return;
       }
 
-      // Authenticated but resume not uploaded
       if (requireResume && user && !user.resumeUploaded) {
         router.push("/resume");
         return;
@@ -42,7 +41,6 @@ export function ProtectedRoute({
     }
   }, [loading, isAuthenticated, user, requireProfile, requireResume, router]);
 
-  // Show loading spinner while checking auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -54,21 +52,21 @@ export function ProtectedRoute({
     );
   }
 
-  // Not authenticated
+  
   if (!isAuthenticated) {
-    return null; // Will redirect via useEffect
+    return null; 
   }
 
-  // Profile required but not complete
+  
   if (requireProfile && user && !user.profileCompleted) {
-    return null; // Will redirect via useEffect
+    return null; 
   }
 
-  // Resume required but not uploaded
+ 
   if (requireResume && user && !user.resumeUploaded) {
-    return null; // Will redirect via useEffect
+    return null; 
   }
 
-  // All checks passed - render children
+  
   return <>{children}</>;
 }

@@ -1,84 +1,97 @@
 // src/lib/gemini.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { v4 as uuidv4 } from "uuid";
-import { IUserProfile } from "@/models/user";
+import { IUserProfile } from "@/models/User";
 import { IParsedData } from "@/models/Resume";
 import { IInterviewSession } from "@/models/InterviewSession";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+const RAW_KEYS = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "";
+const API_KEYS = RAW_KEYS.split(",").map(k => k.trim()).filter(k => k.length > 0);
 
-if (!GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY is missing");
+if (API_KEYS.length === 0) {
+  throw new Error("No GEMINI_API_KEYS found in .env.local");
 }
 
 
-// Analyze Resume with Gemini
+const MODEL_NAME = "gemini-2.5-flash-lite"; 
+
+async function runWithKeyRotation<T>(
+  operation: (model: any) => Promise<T>
+): Promise<T> {
+  let lastError: any;
+
+  for (const apiKey of API_KEYS) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      
+ 
+      const model = genAI.getGenerativeModel({ 
+        model: MODEL_NAME,
+        generationConfig: { responseMimeType: "application/json" } 
+      });
+      
+      return await operation(model);
+    } catch (error: any) {
+     
+      const isQuotaError = 
+        error.message?.includes("429") || 
+        error.message?.includes("Quota") || 
+        error.message?.includes("Too Many Requests") ||
+        error.status === 429;
+      
+      if (isQuotaError) {
+        console.warn(`⚠️ Key ending in ...${apiKey.slice(-4)} exhausted. Switching...`);
+        lastError = error;
+        continue; 
+      } else {
+        throw error; 
+      }
+    }
+  }
+
+  console.error("❌ CRITICAL: All API keys exhausted.");
+  throw lastError;
+}
 
 export async function analyzeResumeWithGemini(
-  resumeText: string,
-  retries = 3
+  resumeText: string
 ): Promise<IParsedData> {
-  const prompt = `
-You are a strictly technical resume parser.
-Return ONLY valid JSON. No markdown.
-
-Required format:
-{
-  "skills": ["skill1", "skill2"],
-  "projects": [
-    { "name": "Project Name", "description": "Short description", "technologies": ["tech1"] }
-  ],
-  "experience": [
-    { "role": "Role", "company": "Company", "duration": "Duration", "description": "Description" }
-  ],
-  "education": [
-    { "degree": "Degree", "institution": "Institute name", "year": "Year" }
-  ]
-}
-
-Resume Text:
-${resumeText}
-`;
+  const defaultErrorResponse = { skills: [], projects: [], experience: [], education: [] };
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      }
-    );
+    return await runWithKeyRotation(async (model) => {
+      const prompt = `
+        You are a strictly technical resume parser.
+        Return ONLY valid JSON.
+        
+        Required format:
+        {
+          "skills": ["skill1", "skill2"],
+          "projects": [
+            { "name": "Project Name", "description": "Short description", "technologies": ["tech1"] }
+          ],
+          "experience": [
+            { "role": "Role", "company": "Company", "duration": "Duration", "description": "Description" }
+          ],
+          "education": [
+            { "degree": "Degree", "institution": "Institute name", "year": "Year" }
+          ]
+        }
+        
+        Resume Text:
+        ${resumeText.slice(0, 15000)} 
+      `;
 
-    if (!response.ok) {
-      if (response.status === 503 && retries > 0) {
-        console.warn(`⚠️ Gemini overloaded. Retrying... (${retries})`);
-        await new Promise((res) => setTimeout(res, 2000));
-        return analyzeResumeWithGemini(resumeText, retries - 1);
-      }
-      throw new Error(`Gemini API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!rawText) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    return JSON.parse(
-      rawText.replace(/```json/g, "").replace(/```/g, "").trim()
-    );
-  } catch (error: any) {
-    console.error("❌ Gemini Error:", error.message);
-    throw new Error("Failed to analyze resume");
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text(); 
+      return JSON.parse(text);
+    });
+  } catch (error) {
+    console.error("❌ Gemini Resume Analysis Failed:", error);
+    return defaultErrorResponse;
   }
 }
-
-
-// Generate Interview Question
 
 interface QuestionContext {
   type: "technical" | "behavioral" | "role-specific";
@@ -92,8 +105,8 @@ interface QuestionContext {
 interface GeneratedQuestion {
   id: string;
   text: string;
-  category: "DSA" | "System Design" | "Behavioral" | "Technical" | "General";
-  difficulty: "easy" | "medium" | "hard";
+  category: string;
+  difficulty: string;
 }
 
 export async function generateQuestion(
@@ -101,70 +114,90 @@ export async function generateQuestion(
 ): Promise<GeneratedQuestion> {
   const { type, difficulty, profile, resume, questionNumber, previousQuestions } = context;
 
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-  let typeSpecificContext = "";
-  if (type === "technical") {
-    typeSpecificContext = `Focus: DSA, System Design, OOP, design patterns`;
-  } else if (type === "behavioral") {
-    typeSpecificContext = `Focus: STAR method, teamwork, leadership`;
-  } else {
-    typeSpecificContext = `Focus: Technologies from resume: ${resume?.skills?.join(", ") || "General"}`;
-  }
-
-  const prompt = `
-You are an expert interviewer conducting a ${type} interview.
-
-Candidate: ${profile?.targetRole || "Software Developer"} (${profile?.experience || "Fresher"})
-Skills: ${resume?.skills?.join(", ") || "Not specified"}
-
-${typeSpecificContext}
-Difficulty: ${difficulty}
-Question #${questionNumber}
-
-${previousQuestions?.length ? `Previously asked:\n${previousQuestions.map((q, i) => `${i + 1}. ${q.text}`).join("\n")}` : ""}
-
-Generate ONE unique question. Return ONLY valid JSON:
-{
-  "text": "Your question?",
-  "category": "DSA" | "System Design" | "Behavioral" | "Technical" | "General",
-  "difficulty": "easy" | "medium" | "hard"
-}
-`;
+  console.log(`👀 Generating ${type} question (${difficulty})`);
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
-    const parsed = JSON.parse(text);
+    return await runWithKeyRotation(async (model) => {
+      
+      let specificInstructions = "";
 
-    return {
-      id: uuidv4(),
-      text: parsed.text,
-      category: parsed.category,
-      difficulty: parsed.difficulty || difficulty,
-    };
+      if (type === "technical") {
+        specificInstructions = `
+          CONTEXT: This is a pure Technical Interview (DSA & System Design).
+          INSTRUCTIONS:
+          1. Ask a coding problem (Data Structures & Algorithms) OR a System Design concept.
+          2. Difficulty Level: ${difficulty}.
+          3. DO NOT ask about the user's specific resume projects. Stick to general CS concepts.
+          4. Topics: Arrays, Strings, Trees, Graphs, SQL, Scalability, APIs.
+        `;
+      } else if (type === "behavioral") {
+        specificInstructions = `
+          CONTEXT: This is a Behavioral Interview (HR Round).
+          INSTRUCTIONS:
+          1. Ask a soft-skill question requiring the STAR method.
+          2. Focus on: Leadership, Conflict, Adaptability, Teamwork.
+        `;
+      } else {
+        
+        specificInstructions = `
+          CONTEXT: This is a Personalized Resume-Based Interview.
+          INSTRUCTIONS:
+          1. Analyze the candidate's Projects and Skills.
+          2. Ask a specific technical question about THEIR implementation.
+          3. IF RESUME IS EMPTY: Ask a standard full-stack web development question.
+          4. DO NOT use placeholders. Use actual data.
+        `;
+      }
+
+      const prompt = `
+        You are an expert interviewer.
+        
+        CANDIDATE DATA (Use ONLY if this is a Resume-Based interview):
+        - Skills: ${JSON.stringify(resume?.skills || [])}
+        - Projects: ${JSON.stringify(resume?.projects || [])}
+        
+        SESSION DETAILS:
+        - Question Number: ${questionNumber}
+        - Previously Asked (DO NOT REPEAT): ${previousQuestions?.map(q => q.text).join(" | ")}
+        
+        ${specificInstructions}
+        
+        Return ONLY valid JSON:
+        {
+          "text": "The question text",
+          "category": "${type === 'behavioral' ? 'Behavioral' : 'Technical'}",
+          "difficulty": "${difficulty}"
+        }
+      `;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      const parsed = JSON.parse(text);
+
+      return {
+        id: uuidv4(),
+        text: parsed.text,
+        category: parsed.category || "Technical",
+        difficulty: parsed.difficulty || difficulty,
+      };
+    });
   } catch (error) {
-    console.error("❌ Question generation error:", error);
+    console.error("❌ Question Gen Failed:", error);
     return {
       id: uuidv4(),
-      text: "Tell me about your experience with software development.",
-      category: "General",
-      difficulty,
+      text: "Tell me about the most challenging technical problem you have solved recently.",
+      category: "Technical",
+      difficulty: "medium",
     };
   }
 }
-
-
-// Evaluate Answer
 
 interface EvaluationContext {
   question: string;
   answer: string;
   category: string;
   difficulty: string;
-  onStream?: (chunk: string) => void;
 }
 
 interface Evaluation {
@@ -177,78 +210,57 @@ interface Evaluation {
 export async function evaluateAnswer(
   context: EvaluationContext
 ): Promise<Evaluation> {
-  const { question, answer, category, difficulty, onStream } = context;
+  const { question, answer, category, difficulty } = context;
 
-  if (!answer || answer.trim().length < 10) {
+  if (!answer || answer.trim().length < 2) {
     return {
-      score: 1,
-      feedback: "Answer too brief. Provide more details.",
+      score: 0,
+      feedback: "No answer provided.",
       strengths: [],
-      improvements: ["Elaborate more", "Include examples"],
+      improvements: ["Please provide an answer."],
     };
   }
-
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-
-  const prompt = `
-Evaluate this interview answer:
-
-Question: ${question}
-Category: ${category}
-Difficulty: ${difficulty}
-Answer: "${answer}"
-
-Return ONLY valid JSON:
-{
-  "score": 8,
-  "feedback": "2-4 sentences of feedback",
-  "strengths": ["strength1", "strength2"],
-  "improvements": ["improvement1", "improvement2"]
-}
-`;
 
   try {
-    if (onStream) {
-      const result = await model.generateContentStream(prompt);
-      let fullText = "";
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        fullText += chunkText;
-        onStream(chunkText);
-      }
-      const cleaned = fullText.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-      return {
-        score: Math.min(10, Math.max(0, parsed.score || 5)),
-        feedback: parsed.feedback || "Answer evaluated.",
-        strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
-        improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 3) : [],
-      };
-    } else {
+    return await runWithKeyRotation(async (model) => {
+      const prompt = `
+        Evaluate this interview answer.
+        Question: "${question}"
+        Category: ${category}
+        Difficulty: ${difficulty}
+        User Answer: "${answer}"
+        
+        Return ONLY valid JSON:
+        {
+          "score": (number 0-10),
+          "feedback": "2-3 sentences of constructive feedback",
+          "strengths": ["point 1", "point 2"],
+          "improvements": ["point 1", "point 2"]
+        }
+      `;
+
       const result = await model.generateContent(prompt);
-      const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+      const response = await result.response;
+      const text = response.text();
       const parsed = JSON.parse(text);
+
       return {
-        score: Math.min(10, Math.max(0, parsed.score || 5)),
-        feedback: parsed.feedback || "Answer evaluated.",
-        strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
-        improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 3) : [],
+        score: parsed.score || 5,
+        feedback: parsed.feedback || "Good attempt.",
+        strengths: parsed.strengths || [],
+        improvements: parsed.improvements || [],
       };
-    }
+    });
   } catch (error) {
-    console.error("❌ Evaluation error:", error);
+    console.error("❌ Evaluation Failed:", error);
     return {
       score: 5,
-      feedback: "Could not evaluate. Try again.",
-      strengths: ["Attempted answer"],
-      improvements: ["Provide more detail"],
+      feedback: "Could not process answer due to server load.",
+      strengths: [],
+      improvements: [],
     };
   }
 }
-
-
-// Generate Final Report
 
 export async function generateFinalReport(session: IInterviewSession) {
   const answeredQuestions = session.questions.filter(
@@ -257,22 +269,53 @@ export async function generateFinalReport(session: IInterviewSession) {
 
   if (answeredQuestions.length === 0) {
     return {
-      strengths: ["Completed interview"],
-      weaknesses: ["No answers provided"],
-      recommendations: ["Try answering next time"],
+      summary: "No questions answered.",
+      strengths: [],
+      weaknesses: ["Participation"],
+      recommendations: ["Complete the interview next time"],
     };
   }
 
-  const avgScore =
-    answeredQuestions.reduce((sum, q) => sum + (q.evaluation?.score || 0), 0) /
-    answeredQuestions.length;
+  try {
+    return await runWithKeyRotation(async (model) => {
+      const prompt = `
+        Generate a final interview feedback report based on this session:
+        
+        Candidate Data:
+        ${JSON.stringify(answeredQuestions.map(q => ({
+          question: q.text,
+          answer: q.answer,
+          score: q.evaluation?.score
+        })))}
+        
+        Output JSON ONLY:
+        {
+          "summary": "Overall summary of performance (3-4 sentences)",
+          "keyStrengths": ["strength 1", "strength 2", "strength 3"],
+          "areasForImprovement": ["area 1", "area 2", "area 3"],
+          "recommendation": "Strong Hire / Hire / Weak Hire / No Hire"
+        }
+      `;
 
-  return {
-    strengths: avgScore >= 7 ? ["Strong performance"] : ["Completed interview"],
-    weaknesses: avgScore < 5 ? ["Needs improvement"] : [],
-    recommendations: [
-      avgScore < 6 ? "Focus on fundamentals" : "Keep practicing",
-      "Review challenging questions",
-    ],
-  };
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      const parsed = JSON.parse(text);
+
+      return {
+        summary: parsed.summary,
+        strengths: parsed.keyStrengths,
+        weaknesses: parsed.areasForImprovement,
+        recommendations: [parsed.recommendation, ...parsed.areasForImprovement],
+      };
+    });
+  } catch (error) {
+    console.error("❌ Final Report Failed:", error);
+    return {
+      summary: "Interview completed.",
+      strengths: ["Completed the session"],
+      weaknesses: [],
+      recommendations: ["Review your answers manually"]
+    };
+  }
 }

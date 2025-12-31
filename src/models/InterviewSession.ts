@@ -28,7 +28,7 @@ export interface IFinalReport {
   };
 }
 
-// ✅ FIXED: Removed "extends Document"
+
 export interface IInterviewSession {
   _id: string;
   userId: mongoose.Types.ObjectId;

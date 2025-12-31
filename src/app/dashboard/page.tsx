@@ -1,24 +1,27 @@
-// src/app/dashboard/page.tsx
 "use client";
 
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { api } from "@/lib/api";
 import {
   ArrowRight,
   TrendingUp,
   Clock,
-  CheckCircle,
   Target,
-  Brain,
   Award,
-  Calendar,
   BarChart3,
   FileText,
   PlayCircle,
+  Loader2,
+  CheckCircle,
   Sparkles,
-  AlertCircle,
+  Calendar,
+  Trophy,
+  Zap
 } from "lucide-react";
 
 interface DashboardStats {
@@ -41,8 +44,9 @@ interface RecentInterview {
 }
 
 export default function DashboardPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalInterviews: 0,
     completedInterviews: 0,
@@ -54,325 +58,280 @@ export default function DashboardPage() {
   const [recentInterviews, setRecentInterviews] = useState<RecentInterview[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleStartInterview = () => {
+    if (user?.resumeUploaded) {
+      router.push("/interview/ai-powered/start");
+    } else {
+      const wantToUpload = window.confirm(
+        "💡 Pro Tip: Uploading a resume unlocks personalized questions.\n\nClick OK to Upload Resume.\nClick Cancel to start a generic Technical Interview."
+      );
+
+      if (wantToUpload) {
+        router.push("/resume");
+      } else {
+        router.push("/interview/technical/start");
+      }
+    }
+  };
+
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-   }
-
-    // Simulate loading dashboard data
     const loadDashboardData = async () => {
-      // TODO: Replace with actual API calls
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock data
-      setStats({
-        totalInterviews: 12,
-        completedInterviews: 8,
-        averageScore: 78,
-        improvementRate: 15,
-        practiceStreak: 5,
-        totalMinutes: 180,
-      });
-
-      setRecentInterviews([
-        {
-          id: "1",
-          type: "Technical",
-          role: "Frontend Developer",
-          score: 85,
-          date: "2024-01-15",
-          duration: 45,
-          completed: true,
-        },
-        {
-          id: "2",
-          type: "Behavioral",
-          role: "Product Manager",
-          score: 72,
-          date: "2024-01-14",
-          duration: 30,
-          completed: true,
-        },
-        {
-          id: "3",
-          type: "Technical",
-          role: "Backend Developer",
-          score: 0,
-          date: "2024-01-13",
-          duration: 0,
-          completed: false,
-        },
-      ]);
-
-      setLoading(false);
+      try {
+        const data: any = await api.get("/api/dashboard/stats");
+        
+        if (data && data.stats) {
+            setStats(data.stats);
+            setRecentInterviews(data.recentInterviews);
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-  loadDashboardData();
- }, [isAuthenticated, router]);
+    loadDashboardData();
+  }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="animate-spin h-12 w-12 text-primary mx-auto" />
+          <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    return "text-red-500";
-  };
-
-  const getScoreBgColor = (score: number) => {
-    if (score >= 80) return "bg-green-500/10 border-green-500/20";
-    if (score >= 60) return "bg-yellow-500/10 border-yellow-500/20";
-    return "bg-red-500/10 border-red-500/20";
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold">Dashboard</h1>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                {stats.practiceStreak} day streak
-              </span>
-            </div>
-          </div>
-          <p className="text-muted-foreground">
-            Welcome back, <span className="font-medium text-foreground">{user?.name}</span>! Here's your interview practice overview.
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <Link
-            href="/interview"
-            className="group relative flex items-center gap-4 p-6 rounded-2xl border bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-              <PlayCircle className="h-7 w-7" />
-            </div>
-            <div className="relative flex-1">
-              <h3 className="font-semibold text-lg mb-1">Start Interview</h3>
-              <p className="text-sm text-muted-foreground">Practice now</p>
-            </div>
-            <ArrowRight className="relative h-5 w-5 text-primary transition-transform group-hover:translate-x-1" />
-          </Link>
-
-          <Link
-            href="/resume"
-            className="group relative flex items-center gap-4 p-6 rounded-2xl border bg-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary">
-              <FileText className="h-7 w-7 text-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">Upload Resume</h3>
-              <p className="text-sm text-muted-foreground">Update profile</p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-          </Link>
-
-          <Link
-            href="/profile"
-            className="group relative flex items-center gap-4 p-6 rounded-2xl border bg-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02] sm:col-span-2 lg:col-span-1"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary">
-              <BarChart3 className="h-7 w-7 text-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">View Progress</h3>
-              <p className="text-sm text-muted-foreground">Detailed analytics</p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard
-            icon={<Target className="h-6 w-6" />}
-            label="Total Interviews"
-            value={stats.totalInterviews.toString()}
-            subtext={`${stats.completedInterviews} completed`}
-            color="blue"
-          />
-          <StatCard
-            icon={<Award className="h-6 w-6" />}
-            label="Average Score"
-            value={`${stats.averageScore}%`}
-            subtext={`+${stats.improvementRate}% this week`}
-            color="green"
-          />
-          <StatCard
-            icon={<Clock className="h-6 w-6" />}
-            label="Practice Time"
-            value={`${Math.floor(stats.totalMinutes / 60)}h ${stats.totalMinutes % 60}m`}
-            subtext="Total time"
-            color="purple"
-          />
-          <StatCard
-            icon={<TrendingUp className="h-6 w-6" />}
-            label="Improvement"
-            value={`${stats.improvementRate}%`}
-            subtext="Last 7 days"
-            color="orange"
-          />
-        </div>
-
-        {/* Recent Interviews */}
-        <div className="bg-card rounded-2xl border p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-1">Recent Interviews</h2>
-              <p className="text-sm text-muted-foreground">
-                Your latest practice sessions
-              </p>
-            </div>
-            <Link
-              href="/interview"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              View all
-            </Link>
-          </div>
-
-          {recentInterviews.length === 0 ? (
-            <div className="text-center py-12">
-              <Brain className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">No interviews yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Start your first interview practice session
-              </p>
-              <Link
-                href="/interview"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-              >
-                <PlayCircle className="h-5 w-5" />
-                Start Interview
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentInterviews.map((interview) => (
-                <div
-                  key={interview.id}
-                  className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border bg-background hover:shadow-md transition-shadow"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{interview.role}</h3>
-                      <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {interview.type}
-                      </span>
-                      {!interview.completed && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-yellow-500/10 text-yellow-600 border border-yellow-500/20">
-                          In Progress
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(interview.date).toLocaleDateString()}
-                      </span>
-                      {interview.completed && (
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          {interview.duration} min
-                        </span>
-                      )}
-                    </div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 flex flex-col">
+        <Navbar />
+        
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-600/10 border-2 border-primary/20 p-6 sm:p-8">
+              <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,transparent,black)] dark:bg-grid-slate-700/25" />
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold text-primary">Welcome Back</span>
                   </div>
-                  {interview.completed ? (
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getScoreBgColor(interview.score)}`}>
-                      <Award className={`h-5 w-5 ${getScoreColor(interview.score)}`} />
-                      <span className={`font-bold text-lg ${getScoreColor(interview.score)}`}>
-                        {interview.score}%
-                      </span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={`/interview/${interview.id}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors text-sm"
-                    >
-                      Continue
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  )}
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-1">
+                    Hey, {user?.name}! 👋
+                  </h1>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Ready to level up your interview skills today?
+                  </p>
                 </div>
-              ))}
+                <div className="flex items-center gap-3 bg-background/50 backdrop-blur-sm rounded-xl px-4 py-3 border border-border/50">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Current Streak</p>
+                    <p className="text-lg font-bold text-foreground">{stats.practiceStreak} Days 🔥</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Tips Section */}
-        <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl border border-primary/20 p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground flex-shrink-0">
-              <AlertCircle className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Tip of the Day</h3>
-              <p className="text-muted-foreground mb-4">
-                Practice the STAR method (Situation, Task, Action, Result) for behavioral questions. This structured approach helps you deliver clear, compelling answers that showcase your experience effectively.
-              </p>
-              <Link
-                href="/interview"
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Zap className="h-5 w-5 text-primary" />
+              Quick Actions
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <button 
+                onClick={handleStartInterview}
+                className="group relative p-6 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 hover:from-primary/10 hover:to-purple-500/10 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col gap-3 text-left cursor-pointer overflow-hidden"
               >
-                Practice now
-                <ArrowRight className="h-4 w-4" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative z-10">
+                  <div className="h-12 w-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform">
+                    <PlayCircle className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-bold text-xl text-foreground mb-1">Start Interview</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Practice with AI now</p>
+                  <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+                    <span>Let's go</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </button>
+              
+              <Link 
+                href="/resume" 
+                className={`group relative p-6 rounded-2xl border-2 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col gap-3 overflow-hidden ${
+                  user?.resumeUploaded 
+                    ? "border-green-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20" 
+                    : "border-border bg-card hover:border-primary/30"
+                }`}
+              >
+                <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500 ${
+                  user?.resumeUploaded ? "bg-green-500/10" : "bg-secondary/50"
+                }`} />
+                <div className="relative z-10">
+                  <div className={`h-12 w-12 rounded-xl flex items-center justify-center mb-3 shadow-md ${
+                    user?.resumeUploaded 
+                      ? "bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400" 
+                      : "bg-secondary text-foreground"
+                  }`}>
+                    {user?.resumeUploaded ? <CheckCircle className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
+                  </div>
+                  <h3 className="font-bold text-xl text-foreground mb-1">
+                    {user?.resumeUploaded ? "Resume Uploaded ✓" : "Upload Resume"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.resumeUploaded 
+                      ? "Update or replace your resume" 
+                      : "Unlock personalized questions"}
+                  </p>
+                </div>
               </Link>
+
+              <Link 
+                href="/history"
+                className="group relative p-6 rounded-2xl border-2 border-border bg-card hover:border-primary/30 transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col gap-3 overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/50 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative z-10">
+                  <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-3 shadow-md">
+                    <BarChart3 className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-bold text-xl text-foreground mb-1">View History</h3>
+                  <p className="text-sm text-muted-foreground">Track your progress</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="mb-8">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Your Performance
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard 
+                icon={<Target />} label="Total Interviews" value={stats.totalInterviews} 
+                gradient="from-blue-500 to-cyan-500" bgColor="bg-blue-50 dark:bg-blue-950/20"
+              />
+              <StatCard 
+                icon={<Award />} label="Avg. Score" value={`${stats.averageScore}%`} 
+                gradient="from-green-500 to-emerald-500" bgColor="bg-green-50 dark:bg-green-950/20"
+              />
+              <StatCard 
+                icon={<Clock />} label="Practice Time" 
+                value={`${Math.floor(stats.totalMinutes/60)}h ${stats.totalMinutes%60}m`} 
+                gradient="from-purple-500 to-pink-500" bgColor="bg-purple-50 dark:bg-purple-950/20"
+              />
+              <StatCard 
+                icon={<TrendingUp />} label="Current Streak" value={`${stats.practiceStreak} Days`} 
+                gradient="from-orange-500 to-red-500" bgColor="bg-orange-50 dark:bg-orange-950/20"
+              />
+            </div>
+          </div>
+
+          {/* Recent Interviews List */}
+          <div>
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Recent Activity
+            </h2>
+            <div className="bg-card rounded-2xl border-2 border-border p-6 shadow-lg">
+              {recentInterviews.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
+                    <PlayCircle className="h-12 w-12 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">No interviews yet</h3>
+                  <p className="text-muted-foreground mb-6">Start your first interview to track your progress!</p>
+                  <button 
+                    onClick={handleStartInterview}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all hover:scale-105"
+                  >
+                    <PlayCircle className="h-5 w-5" /> Start Interview
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentInterviews.map((interview) => (
+                    <div 
+                      key={interview.id} 
+                      className="group flex items-center justify-between p-5 border-2 border-border rounded-xl hover:bg-accent/50 hover:border-primary/30 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                          interview.completed 
+                            ? interview.score >= 80 
+                              ? "bg-green-100 dark:bg-green-950/30" 
+                              : "bg-yellow-100 dark:bg-yellow-950/30"
+                            : "bg-blue-100 dark:bg-blue-950/30"
+                        }`}>
+                          {interview.completed ? (
+                            <Award className={`h-6 w-6 ${interview.score >= 80 ? "text-green-600" : "text-yellow-600"}`} />
+                          ) : (
+                            <Clock className="h-6 w-6 text-blue-600" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-foreground capitalize group-hover:text-primary transition-colors">
+                            {interview.type} Interview
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {new Date(interview.date).toLocaleDateString()}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              
+                              {interview.duration || 1} mins
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {interview.completed ? (
+                          <div className="text-right">
+                            <div className={`text-2xl font-bold ${interview.score >= 80 ? 'text-green-600' : 'text-yellow-600'}`}>
+                              {interview.score}%
+                            </div>
+                            <div className="text-xs text-muted-foreground">Score</div>
+                          </div>
+                        ) : (
+                          <span className="text-xs font-bold bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full">
+                            In Progress
+                          </span>
+                        )}
+                        <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all transform -translate-x-2 group-hover:translate-x-0" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  subtext,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  subtext: string;
-  color: "blue" | "green" | "purple" | "orange";
-}) {
-  const colorClasses = {
-    blue: "from-blue-500 to-cyan-500",
-    green: "from-green-500 to-emerald-500",
-    purple: "from-purple-500 to-pink-500",
-    orange: "from-orange-500 to-red-500",
-  };
-
+function StatCard({ icon, label, value, gradient, bgColor }: any) {
   return (
-    <div className="relative group">
-      <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl blur-xl -z-10 from-primary/20 to-primary/5" />
-      <div className="flex flex-col p-6 rounded-2xl border bg-card hover:shadow-lg transition-all duration-300">
-        <div className={`inline-flex w-fit p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} mb-4 shadow-lg`}>
+    <div className="group relative overflow-hidden rounded-2xl border-2 border-border bg-card p-6 hover:shadow-xl hover:-translate-y-1 transition-all">
+      <div className={`absolute top-0 right-0 w-24 h-24 ${bgColor} rounded-full blur-2xl opacity-50 group-hover:scale-150 transition-transform duration-500`} />
+      <div className="relative z-10 flex flex-col gap-2">
+        <div className={`w-fit p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg mb-2`}>
           <div className="text-white">{icon}</div>
         </div>
-        <p className="text-sm text-muted-foreground mb-1">{label}</p>
-        <p className="text-3xl font-bold mb-1">{value}</p>
-        <p className="text-xs text-muted-foreground">{subtext}</p>
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="text-3xl font-extrabold text-foreground">{value}</p>
       </div>
     </div>
   );
