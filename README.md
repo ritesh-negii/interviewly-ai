@@ -8,7 +8,7 @@
 
 **InterviewAI** is an intelligent mock interview application designed to help developers practice technical, behavioral, and role-specific questions. Powered by **Google Gemini AI**, it generates personalized questions based on your resume and provides real-time feedback with scoring.
 
-🔗 **[Live Demo](https://your-vercel-app-url.vercel.app)** 
+🔗 **[Live Demo](https://interviewly-ai.vercel.app/)**
 
 ---
 
