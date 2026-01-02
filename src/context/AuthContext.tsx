@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(response.user as User);
         setIsAuthenticated(true);
         toast.success("Account created successfully!");
-        router.push("/profile");
+        router.push("/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message || "Signup failed");

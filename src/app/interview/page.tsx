@@ -1,6 +1,4 @@
-
 "use client";
-
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -38,7 +36,7 @@ export default function InterviewPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [hasResume, setHasResume] = useState(true); 
+  const [hasResume, setHasResume] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -46,7 +44,18 @@ export default function InterviewPage() {
     }
   }, [isAuthenticated, router]);
 
+
   const interviewTypes: InterviewType[] = [
+    {
+      id: "ai-powered",
+      title: "AI-Powered Mock",
+      description: "Dynamic interview with personalized questions based on your resume",
+      icon: <Brain className="h-8 w-8" />,
+      duration: "60 min",
+      difficulty: "Advanced",
+      questions: "10-12",
+      color: "from-green-500 to-emerald-500",
+    },
     {
       id: "technical",
       title: "Technical Interview",
@@ -66,16 +75,6 @@ export default function InterviewPage() {
       difficulty: "Beginner",
       questions: "8-10",
       color: "from-purple-500 to-pink-500",
-    },
-    {
-      id: "ai-powered",
-      title: "AI-Powered Mock",
-      description: "Dynamic interview with personalized questions based on your resume",
-      icon: <Brain className="h-8 w-8" />,
-      duration: "60 min",
-      difficulty: "Advanced",
-      questions: "10-12",
-      color: "from-green-500 to-emerald-500",
     },
   ];
 
@@ -97,9 +96,9 @@ export default function InterviewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 py-8">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Header */}
+      
         <div className="mb-8">
-          <Link 
+          <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
           >
@@ -119,7 +118,7 @@ export default function InterviewPage() {
           </div>
         </div>
 
-        {/* Resume Alert */}
+    
         {!hasResume && (
           <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/20 flex items-start gap-4 shadow-lg">
             <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
@@ -142,35 +141,35 @@ export default function InterviewPage() {
           </div>
         )}
 
-        {/* Interview Type Cards */}
+  
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {interviewTypes.map((type) => (
             <div
               key={type.id}
               className={`group relative rounded-2xl border-2 p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer overflow-hidden ${
-                selectedType === type.id 
-                  ? "ring-4 ring-primary/50 border-primary shadow-xl shadow-primary/20" 
+                selectedType === type.id
+                  ? "ring-4 ring-primary/50 border-primary shadow-xl shadow-primary/20"
                   : "border-border hover:border-primary/50"
               } ${type.id === "ai-powered" && !hasResume ? "opacity-60" : ""}`}
               onClick={() => setSelectedType(type.id)}
             >
-              {/* Background Gradient */}
+        
               <div className={`absolute inset-0 bg-gradient-to-br ${type.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-              
-              {/* Lock Badge for AI-Powered if no resume */}
+
+          
               {type.id === "ai-powered" && !hasResume && (
                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/30 text-xs font-bold text-yellow-700 dark:text-yellow-400">
                   🔒 Resume Required
                 </div>
               )}
-              
+
               <div className="relative z-10">
-                {/* Icon */}
+          
                 <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${type.color} mb-5 shadow-xl group-hover:scale-110 transition-transform duration-300`}>
                   <div className="text-white">{type.icon}</div>
                 </div>
 
-                {/* Content */}
+            
                 <h3 className="text-2xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors">
                   {type.title}
                 </h3>
@@ -178,7 +177,7 @@ export default function InterviewPage() {
                   {type.description}
                 </p>
 
-                {/* Metadata */}
+                
                 <div className="space-y-2.5 mb-6 pb-6 border-b border-border">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -199,11 +198,11 @@ export default function InterviewPage() {
                   </div>
                 </div>
 
-                {/* Start Button */}
+            
                 <button
                   onClick={(e) => {
-                      e.stopPropagation();
-                      handleStartInterview(type.id);
+                    e.stopPropagation();
+                    handleStartInterview(type.id);
                   }}
                   disabled={type.id === "ai-powered" && !hasResume}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
@@ -216,9 +215,9 @@ export default function InterviewPage() {
           ))}
         </div>
 
-        {/* Tips Section - Enhanced */}
+        
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Interview Tips */}
+        
           <div className="bg-card rounded-2xl border-2 border-border p-6 shadow-lg">
             <div className="flex items-start gap-4 mb-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 flex-shrink-0 shadow-lg">
@@ -246,7 +245,7 @@ export default function InterviewPage() {
             </ul>
           </div>
 
-          {/* What to Expect */}
+          
           <div className="bg-card rounded-2xl border-2 border-border p-6 shadow-lg">
             <div className="flex items-start gap-4 mb-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex-shrink-0 shadow-lg">

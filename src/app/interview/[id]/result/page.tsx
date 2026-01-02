@@ -80,26 +80,12 @@ export default function InterviewResultPage() {
   const questionCount = session.questions?.length || 0;
   const feedback = session.finalReport || {};
 
-  return (
+return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 dark:bg-background font-sans pb-10">
+      {/* Changed bg-slate-50 to bg-background for Dark Mode support */}
+      <div className="min-h-screen bg-background font-sans pb-10">
         
-        {/* Header */}
-        <header className="bg-white dark:bg-card border-b border-slate-200 dark:border-border sticky top-0 z-10">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Link href="/dashboard" className="font-bold text-xl flex items-center gap-2">
-              <span className="bg-primary/10 text-primary p-1.5 rounded-lg">
-                <Award className="h-5 w-5" />
-              </span>
-              <span>Interviewly</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </header>
+        {/* ❌ DELETED: The <header> section. Your main layout will handle the Navbar now. */}
 
         <main className="container mx-auto px-4 py-8 max-w-5xl">
           {/* Success Banner */}
@@ -126,12 +112,12 @@ export default function InterviewResultPage() {
                   </div>
                 </div>
 
-                <div className="bg-white text-green-700 rounded-2xl p-6 text-center min-w-[160px] shadow-lg">
-                  <p className="text-sm font-bold uppercase tracking-wider opacity-70">Overall Score</p>
-                  <div className="text-5xl font-black my-1">{score}%</div>
+                <div className="bg-card text-foreground rounded-2xl p-6 text-center min-w-[160px] shadow-lg border border-border">
+                  <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground opacity-70">Overall Score</p>
+                  <div className="text-5xl font-black my-1 text-primary">{score}%</div>
                   <div className="flex justify-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <div key={star} className={`h-2 w-2 rounded-full ${star <= (score / 20) ? 'bg-green-600' : 'bg-gray-300'}`} />
+                      <div key={star} className={`h-2 w-2 rounded-full ${star <= (score / 20) ? 'bg-primary' : 'bg-muted'}`} />
                     ))}
                   </div>
                 </div>
@@ -148,69 +134,70 @@ export default function InterviewResultPage() {
             <div className="md:col-span-2 space-y-8">
               
               {/* Executive Summary */}
-              <div className="bg-white dark:bg-card rounded-2xl border border-slate-200 dark:border-border p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-foreground mb-4 flex items-center gap-2">
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
+                <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Performance Summary
                 </h3>
-                <p className="text-slate-700 dark:text-muted-foreground leading-relaxed text-lg">
+                <p className="text-muted-foreground leading-relaxed text-lg">
                   {feedback.summary || "No summary available for this session."}
                 </p>
               </div>
 
               {/* Strengths & Weaknesses */}
               <div className="grid sm:grid-cols-2 gap-6">
-                <div className="bg-green-50 dark:bg-green-950/20 rounded-2xl border border-green-100 dark:border-green-900/30 p-6">
-                  <h4 className="font-bold text-green-800 dark:text-green-400 mb-4 flex items-center gap-2">
+                {/* Fixed colors for Dark Mode legibility */}
+                <div className="bg-green-500/10 rounded-2xl border border-green-500/20 p-6">
+                  <h4 className="font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" /> Key Strengths
                   </h4>
                   <ul className="space-y-3">
                     {feedback.strengths?.length > 0 ? (
                       feedback.strengths.map((item: string, i: number) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-green-900 dark:text-green-100">
+                        <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
                           <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0" />
                           {item}
                         </li>
                       ))
                     ) : (
-                      <li className="text-sm text-green-800 opacity-60">Keep practicing to build strengths!</li>
+                      <li className="text-sm text-muted-foreground opacity-60">Keep practicing to build strengths!</li>
                     )}
                   </ul>
                 </div>
 
-                <div className="bg-orange-50 dark:bg-orange-950/20 rounded-2xl border border-orange-100 dark:border-orange-900/30 p-6">
-                  <h4 className="font-bold text-orange-800 dark:text-orange-400 mb-4 flex items-center gap-2">
+                <div className="bg-orange-500/10 rounded-2xl border border-orange-500/20 p-6">
+                  <h4 className="font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" /> Areas to Improve
                   </h4>
                   <ul className="space-y-3">
                     {feedback.weaknesses?.length > 0 ? (
                       feedback.weaknesses.map((item: string, i: number) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-orange-900 dark:text-orange-100">
+                        <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
                           <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-orange-500 flex-shrink-0" />
                           {item}
                         </li>
                       ))
                     ) : (
-                      <li className="text-sm text-orange-800 opacity-60">No specific weaknesses detected.</li>
+                      <li className="text-sm text-muted-foreground opacity-60">No specific weaknesses detected.</li>
                     )}
                   </ul>
                 </div>
               </div>
 
               {/* Recommendations */}
-              <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl border border-blue-100 dark:border-blue-900/30 p-6">
-                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">Recommended Next Steps</h3>
+              <div className="bg-blue-500/10 rounded-2xl border border-blue-500/20 p-6">
+                <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-4">Recommended Next Steps</h3>
                 <ul className="space-y-3">
                   {feedback.recommendations?.map((rec: string, i: number) => (
-                    <li key={i} className="flex items-start gap-3 text-blue-800 dark:text-blue-200">
-                      <div className="h-6 w-6 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    <li key={i} className="flex items-start gap-3 text-foreground/80">
+                      <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 text-blue-600 dark:text-blue-400">
                         {i + 1}
                       </div>
                       <span>{rec}</span>
                     </li>
                   ))}
                   {(!feedback.recommendations || feedback.recommendations.length === 0) && (
-                     <li className="text-blue-800">Review your answers and try another practice session.</li>
+                     <li className="text-muted-foreground">Review your answers and try another practice session.</li>
                   )}
                 </ul>
               </div>
@@ -218,26 +205,26 @@ export default function InterviewResultPage() {
 
             {/* Sidebar Actions */}
             <div className="space-y-4">
-              <div className="bg-white dark:bg-card rounded-2xl border border-slate-200 dark:border-border p-5 shadow-sm">
-                <h4 className="font-bold text-slate-900 dark:text-foreground mb-4">Actions</h4>
+              <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                <h4 className="font-bold text-foreground mb-4">Actions</h4>
                 <div className="space-y-3">
-                  <Link href="/interview" className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+                  <Link href="/interview" className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
                     <RefreshCw className="h-4 w-4" /> Practice Again
                   </Link>
-                  <Link href="/dashboard" className="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-secondary dark:hover:bg-secondary/80 text-slate-700 dark:text-foreground rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+                  <Link href="/dashboard" className="w-full py-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
                     <Home className="h-4 w-4" /> Dashboard
                   </Link>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-card rounded-2xl border border-slate-200 dark:border-border p-5 shadow-sm">
-                <h4 className="font-bold text-slate-900 dark:text-foreground mb-2">Share Result</h4>
-                <p className="text-xs text-slate-500 mb-4">Showcase your progress to your network.</p>
+              <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                <h4 className="font-bold text-foreground mb-2">Share Result</h4>
+                <p className="text-xs text-muted-foreground mb-4">Showcase your progress to your network.</p>
                 <div className="flex gap-2">
-                  <button className="flex-1 py-2 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
+                  <button className="flex-1 py-2 border border-border rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors">
                     <Share2 className="h-4 w-4" />
                   </button>
-                  <button className="flex-1 py-2 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
+                  <button className="flex-1 py-2 border border-border rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors">
                     <Download className="h-4 w-4" />
                   </button>
                 </div>
