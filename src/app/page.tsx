@@ -66,7 +66,7 @@ export default function HomePage() {
                 <>
                   <Link
                     href="/signup"
-                    className="group relative inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-primary hover:bg-primary/90 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 sm:min-w-[240px]"
+                    className="group relative inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 sm:min-w-[240px]"
                   >
                     <span className="flex items-center gap-2 whitespace-nowrap">
                       Start Practicing Free
@@ -85,7 +85,7 @@ export default function HomePage() {
               {isAuthenticated && (
                  <Link
                     href="/dashboard"
-                    className="group relative inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-primary hover:bg-primary/90 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 sm:min-w-[240px]"
+                    className="group relative inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 sm:min-w-[240px]"
                   >
                     <span className="flex items-center gap-2">
                       Go to Dashboard
@@ -159,7 +159,7 @@ export default function HomePage() {
               {!isAuthenticated && (
                 <Link
                   href="/signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
                 >
                   Get Started for Free
                   <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
