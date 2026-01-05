@@ -125,17 +125,17 @@ export default function HomePage() {
             />
             <FeatureCard
               icon={<Target className="h-7 w-7 sm:h-8 sm:w-8" />}
-              title="Real-time Feedback"
-              description="Receive instant, detailed evaluation with actionable suggestions and improvements for every answer you provide."
+              title="Instant Feedback"
+              description="Get immediate AI-based evaluation after each response with detailed scoring and actionable improvement suggestions."
               gradient="from-purple-500 via-pink-500 to-purple-600"
               features={['Instant scoring', 'Detailed analysis', 'Improvement tips']}
             />
             <FeatureCard
               icon={<TrendingUp className="h-7 w-7 sm:h-8 sm:w-8" />}
-              title="Track Progress"
-              description="Monitor your performance over time with comprehensive analytics, charts, and identify key areas for improvement."
+              title="Review Sessions"
+              description="Track your interview sessions and review AI feedback to identify areas for improvement and monitor your progress."
               gradient="from-orange-500 via-red-500 to-orange-600"
-              features={['Performance metrics', 'Progress charts', 'Weak spot detection']}
+              features={['Session history', 'AI feedback review', 'Progress tracking']}
             />
           </div>
         </div>
