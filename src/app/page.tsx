@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
-import { ArrowRight, Brain, Target, Sparkles, TrendingUp, Star, CheckCircle2, Zap, Award } from "lucide-react";
+import { ArrowRight, Brain, Target, Sparkles, TrendingUp, CheckCircle2, Zap, Award } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -94,66 +94,6 @@ export default function HomePage() {
                   </Link>
               )}
             </div>
-
-            {/* Enhanced Social Proof */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 pt-8 sm:pt-10 animate-in fade-in duration-1000 delay-300 px-4">
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {[
-                    'bg-gradient-to-br from-blue-500 to-cyan-500',
-                    'bg-gradient-to-br from-purple-500 to-pink-500',
-                    'bg-gradient-to-br from-orange-500 to-red-500',
-                    'bg-gradient-to-br from-green-500 to-emerald-500'
-                  ].map((gradient, i) => (
-                    <div
-                      key={i}
-                      className={`h-10 w-10 sm:h-11 sm:w-11 rounded-full border-3 border-background ${gradient} flex items-center justify-center shadow-lg`}
-                    >
-                      <span className="text-xs sm:text-sm font-bold text-white">
-                        {['👨', '👩', '🧑', '👤'][i]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-xs sm:text-sm font-bold text-foreground">10,000+ professionals</p>
-                  <p className="text-xs text-muted-foreground">practicing daily</p>
-                </div>
-              </div>
-              <div className="hidden sm:block h-12 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-500 text-yellow-500" />
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-xs sm:text-sm font-bold text-foreground">4.9/5 rating</p>
-                  <p className="text-xs text-muted-foreground">500+ reviews</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Bar */}
-      <section className="py-10 sm:py-12 px-4 sm:px-6 border-y bg-secondary/50">
-        <div className="container max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            {[
-              { value: '50K+', label: 'Practice Sessions' },
-              { value: '95%', label: 'Success Rate' },
-              { value: '200+', label: 'Companies' },
-              { value: '24/7', label: 'AI Support' }
-            ].map((stat, i) => (
-              <div key={i} className="text-center space-y-1">
-                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary">
-                  {stat.value}
-                </p>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -214,7 +154,7 @@ export default function HomePage() {
                 Ready to Ace Your Interview?
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
-                Join thousands of professionals who've landed their dream jobs with InterviewlyAI
+                Experience AI-powered interview preparation designed to help you succeed
               </p>
               {!isAuthenticated && (
                 <Link
